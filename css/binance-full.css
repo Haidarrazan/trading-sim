@@ -298,12 +298,61 @@ main {
 }
 
 .chart-container {
-    height: 300px;
+    height: 400px;
     padding: 1rem;
+    background: #1e2329;
+    border-radius: 4px;
+    position: relative;
+}
+
+#priceChart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Chart type buttons enhancement */
+.chart-actions {
     display: flex;
+    gap: 0.5rem;
     align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid #2b3139;
+}
+
+.chart-type-btn {
+    background: #2b3139;
+    border: 1px solid #474d57;
+    color: #848e9c;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.chart-type-btn:hover, .chart-type-btn.active {
+    background: #f0b90b;
+    color: #1e2329;
+    border-color: #f0b90b;
+}
+
+/* Loading state */
+.chart-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #848e9c;
+}
+
+/* Hover info */
+.chart-tooltip {
+    position: absolute;
+    background: #2b3139;
+    border: 1px solid #474d57;
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    pointer-events: none;
+    z-index: 100;
 }
 
 #priceChart {
