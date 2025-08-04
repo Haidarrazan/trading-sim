@@ -3,59 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Trading Simulator</title>
-    <link rel="stylesheet" href="css/binance-style.css">
+    <title>Binance Clone - Crypto Trading</title>
+    <link rel="stylesheet" href="css/binance-full.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav>
-        <h1><i class="fas fa-coins"></i> CryptoSim</h1>
-        <div>
-            <span id="balance">Balance: $1000</span>
-            <a href="admin.html" class="btn-admin">Admin</a>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="trading-panel">
-            <h2>Trading Panel</h2>
-            <div class="crypto-list" id="cryptoList">
-                <!-- Crypto items will be loaded here -->
+    <!-- Header Navigation -->
+    <header>
+        <nav class="navbar">
+            <div class="nav-left">
+                <div class="logo">
+                    <i class="fas fa-coins"></i>
+                    <span>BinanceClone</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#" class="nav-link active" data-page="trade">Buy Crypto</a></li>
+                    <li><a href="#" class="nav-link" data-page="market">Market</a></li>
+                    <li><a href="#" class="nav-link" data-page="trade">Trade</a></li>
+                    <li><a href="#" class="nav-link" data-page="wallet">Wallet</a></li>
+                </ul>
             </div>
-        </div>
-
-        <div class="portfolio">
-            <h2>Portfolio</h2>
-            <div id="portfolioItems">
-                <p>No assets yet</p>
+            <div class="nav-right">
+                <div class="balance-display">
+                    <span>Total Balance</span>
+                    <span id="totalBalance">$1,000.00</span>
+                </div>
+                <button class="btn-primary" onclick="openModal('deposit')">
+                    <i class="fas fa-plus"></i> Deposit
+                </button>
+                <button class="btn-secondary" onclick="openModal('withdraw')">
+                    <i class="fas fa-minus"></i> Withdraw
+                </button>
             </div>
-            <h3>Transaction History</h3>
-            <div id="transactionHistory">
-                <p>No transactions yet</p>
-            </div>
-        </div>
-    </div>
+        </nav>
+    </header>
 
-    <!-- Modal for Buy/Sell -->
-    <div id="tradeModal" class="modal">
+    <!-- Main Content -->
+    <main>
+        <!-- Trading View Section -->
+        <section id="trade-section" class="page active">
+            <div class="trading-container">
+                <!-- Left Panel - Market Data -->
+                <div class="market-panel">
+                    <div class="panel-header">
+                        <h3>Market</h3>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search pairs..." id="marketSearch">
+                        </div>
+                    </div>
+                    <div class="market-list" id="marketList">
+                        <!-- Market pairs will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Center Panel - Chart & Order Form -->
+                <div class="chart-panel">
+                    <div class="chart-header">
+                        <div class="pair-info">
+                            <span class="pair-name">BTC/USDT</span>
+                            <span class="pair-price" id="currentPrice">$45,234.56</span>
+                            <span class="price-change positive">+2.34%</span>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="time-btn active">1m</button>
+                            <button class="time-btn">5m</button>
+                            <button class="time-btn">1h</button>
+                            <button class="time-btn">1d</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="priceChart" width="600" height="300"></canvas>
+                    </div>
+
+                    <!-- Order Form -->
+                    <div class="order-form-container">
+                        <div class="order-tabs">
+                            <button class="tab-btn active" data-tab="spot">Spot</button>
+                            <button class="tab-btn" data-tab="limit">Limit</button>
+                            <button class="tab-btn" data-tab="recurring">Recurring</button>
+                        </div>
+
+                        <!-- Spot Trading -->
+                        <div class="order-form active" id="spot-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Available</label>
+                                    <span class="available-amount">$<span id="availableUSDT">1000.00</span> USDT</span>
+                                </div>
+                                <div class="form-group">
+                                    <label>Price</label>
+                                    <input type="number" id="spotPrice" readonly>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Amount</label>
+                                    <input type="number" id="spotAmount" placeholder="0.00" step="0.000001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Total</label>
+                                    <input type="number" id="spotTotal" placeholder="0.00" readonly>
+                                </div>
+                            </div>
+                            <div class="percentage-buttons">
+                                <button onclick="setPercentage(25)">25%</button>
+                                <button onclick="setPercentage(50)">50%</button>
+                                <button onclick="setPercentage(75)">75%</button>
+                                <button onclick="setPercentage(100)">100%</button>
+                            </div>
+                            <div class="order-buttons">
+                                <button class="btn-buy" onclick="executeOrder('buy', 'spot')">
+                                    <i class="fas fa-arrow-up"></i> Buy BTC
+                                </button>
+                                <button class="btn-sell" onclick="executeOrder('sell', 'spot')">
+                                    <i class="fas fa-arrow-down"></i> Sell BTC
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Limit Trading -->
+                        <div class="order-form" id="limit-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Limit Price</label>
+                                    <input type="number" id="limitPrice" placeholder="0.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount</label>
+                                    <input type="number" id="limitAmount" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="order-buttons">
+                                <button class="btn-buy" onclick="executeOrder('buy', 'limit')">Buy Limit</button>
+                                <button class="btn-sell" onclick="executeOrder('sell', 'limit')">Sell Limit</button>
+                            </div>
+                        </div>
+
+                        <!-- Recurring Buy -->
+                        <div class="order-form" id="recurring-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Frequency</label>
+                                    <select id="recurringFrequency">
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount per purchase</label>
+                                    <input type="number" id="recurringAmount" placeholder="10.00">
+                                </div>
+                            </div>
+                            <button class="btn-buy" onclick="setupRecurring()">
+                                <i class="fas fa-repeat"></i> Setup Recurring Buy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Order Book & Trades -->
+                <div class="order-panel">
+                    <div class="panel-tabs">
+                        <button class="tab-btn active">Order Book</button>
+                        <button class="tab-btn">Recent Trades</button>
+                    </div>
+                    <div class="order-book">
+                        <div class="order-book-header">
+                            <span>Price (USDT)</span>
+                            <span>Amount (BTC)</span>
+                            <span>Total</span>
+                        </div>
+                        <div class="order-book-content">
+                            <div class="asks">
+                                <!-- Sell orders -->
+                            </div>
+                            <div class="spread">
+                                <span>Spread: 0.01%</span>
+                            </div>
+                            <div class="bids">
+                                <!-- Buy orders -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wallet Section -->
+        <section id="wallet-section" class="page">
+            <div class="wallet-container">
+                <div class="wallet-header">
+                    <h2>My Wallet</h2>
+                    <div class="wallet-actions">
+                        <button class="btn-primary" onclick="openModal('deposit')">
+                            <i class="fas fa-arrow-down"></i> Deposit
+                        </button>
+                        <button class="btn-secondary" onclick="openModal('withdraw')">
+                            <i class="fas fa-arrow-up"></i> Withdraw
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="wallet-list">
+                    <div class="wallet-item header">
+                        <span>Asset</span>
+                        <span>Total Balance</span>
+                        <span>Available</span>
+                        <span>In Order</span>
+                        <span>USD Value</span>
+                    </div>
+                    <div id="walletAssets">
+                        <!-- Wallet assets will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modalTitle">Trade Bitcoin</h2>
-            <p>Current Price: $<span id="currentPrice">0</span></p>
-            <div class="trade-form">
-                <label>Type:</label>
-                <select id="tradeType">
-                    <option value="buy">Buy</option>
-                    <option value="sell">Sell</option>
-                </select>
-                <label>Amount (USD):</label>
-                <input type="number" id="tradeAmount" placeholder="Enter amount" min="1">
-                <button onclick="executeTrade()">Execute Trade</button>
+            <span class="close" onclick="closeModal('deposit')">&times;</span>
+            <h2>Deposit Funds</h2>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Asset</label>
+                    <select id="depositAsset">
+                        <option value="USDT">USDT</option>
+                        <option value="BTC">BTC</option>
+                        <option value="ETH">ETH</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="depositAmount" placeholder="0.00">
+                </div>
+                <button class="btn-primary" onclick="processDeposit()">
+                    <i class="fas fa-plus"></i> Add Funds
+                </button>
             </div>
-            <p id="tradeResult"></p>
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('withdraw')">&times;</span>
+            <h2>Withdraw Funds</h2>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Asset</label>
+                    <select id="withdrawAsset">
+                        <option value="USDT">USDT</option>
+                        <option value="BTC">BTC</option>
+                        <option value="ETH">ETH</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input type="number" id="withdrawAmount" placeholder="0.00">
+                    <small>Available: $<span id="withdrawAvailable">1000.00</span></small>
+                </div>
+                <button class="btn-secondary" onclick="processWithdraw()">
+                    <i class="fas fa-arrow-up"></i> Withdraw
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/binance-components.js"></script>
+    <script src="js/binance-app.js"></script>
 </body>
 </html>
