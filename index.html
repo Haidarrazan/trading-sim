@@ -75,6 +75,27 @@
                             <button class="time-btn">1d</button>
                         </div>
                     </div>
+
+                    <div class="chart-header">
+                        <div class="pair-info">
+                            <span class="pair-name">BTC/USDT</span>
+                            <span class="pair-price" id="currentPrice">$45,234.56</span>
+                            <span class="price-change positive">+2.34%</span>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-type-btn active" onclick="switchChartType('line')">
+                                <i class="fas fa-chart-line"></i> Line
+                            </button>
+                            <button class="chart-type-btn" onclick="switchChartType('candlestick')">
+                                <i class="fas fa-chart-bar"></i> Candle
+                            </button>
+                            <button class="time-btn active" data-interval="1m">1m</button>
+                            <button class="time-btn" data-interval="5m">5m</button>
+                            <button class="time-btn" data-interval="15m">15m</button>
+                            <button class="time-btn" data-interval="1h">1h</button>
+                            <button class="time-btn" data-interval="1d">1d</button>
+                        </div>
+                    </div>
                     
                     <div class="chart-container">
                         <canvas id="priceChart" width="800" height="400"></canvas>
