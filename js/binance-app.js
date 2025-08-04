@@ -133,6 +133,231 @@ function executeOrder(type, orderType) {
     
     cryptoData.saveUserData();
     updateDisplays();
+
+    // CHART MANAGEMENT
+let priceChart = null;
+
+function initChart() {
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    
+    // Generate initial candlestick data
+    const candleData = generateCandleData(50);
+    
+    priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'BTC/USDT',
+                data: candleData,
+                borderColor: '#02c076',
+                backgroundColor: 'rgba(2, 192, 118, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1,
+                pointRadius: 0,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'minute',
+                        displayFormats: {
+                            minute: 'HH:mm'
+                        }
+                    },
+                    ticks: {
+                        color: '#848e9c',
+                        maxTicksLimit: 8
+                    },
+                    grid: {
+                        color: '#2b3139'
+                    }
+                },
+                y: {
+                    position: 'right',
+                    ticks: {
+                        color: '#848e9c',
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    },
+                    grid: {
+                        color: '#2b3139'
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+}
+
+function generateCandleData(count) {
+    const data = [];
+    const basePrice = 45000;
+    let currentPrice = basePrice;
+    
+    for (let i = 0; i < count; i++) {
+        const timestamp = new Date(Date.now() - (count - i) * 60000);
+        
+        // Random price movement
+        const change = (Math.random() - 0.5) * 100;
+        currentPrice += change;
+        
+        data.push({
+            x: timestamp,
+            y: currentPrice
+        });
+    }
+    
+    return data;
+}
+
+function generateCandlestickData(count) {
+    const data = [];
+    let basePrice = 45000;
+    
+    for (let i = 0; i < count; i++) {
+        const timestamp = new Date(Date.now() - (count - i) * 60000);
+        
+        // Generate OHLC data
+        const open = basePrice;
+        const change = (Math.random() - 0.5) * 200;
+        const close = open + change;
+        const high = Math.max(open, close) + Math.random() * 50;
+        const low = Math.min(open, close) - Math.random() * 50;
+        
+        data.push({
+            x: timestamp,
+            o: open,
+            h: high,
+            l: low,
+            c: close
+        });
+        
+        basePrice = close;
+    }
+    
+    return data;
+}
+
+function switchChartType(type) {
+    if (priceChart) {
+        priceChart.destroy();
+    }
+    
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    
+    if (type === 'candlestick') {
+        // Candlestick chart
+        const candleData = generateCandlestickData(50);
+        
+        priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'BTC/USDT',
+                    data: candleData,
+                    segment: {
+                        borderColor: ctx => {
+                            const data = ctx.p0.parsed.y < ctx.p1.parsed.y ? '#02c076' : '#f6465d';
+                            return data;
+                        }
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'minute',
+                            displayFormats: { minute: 'HH:mm' }
+                        },
+                        ticks: { color: '#848e9c', maxTicksLimit: 8 },
+                        grid: { color: '#2b3139' }
+                    },
+                    y: {
+                        position: 'right',
+                        ticks: {
+                            color: '#848e9c',
+                            callback: v => '$' + v.toLocaleString()
+                        },
+                        grid: { color: '#2b3139' }
+                    }
+                }
+            }
+        });
+    } else {
+        // Line chart
+        initChart();
+    }
+}
+
+function updateChartData() {
+    if (!priceChart) return;
+    
+    const symbol = currentPair.split('/')[0];
+    const newPrice = cryptoData.assets[symbol].price;
+    
+    const newData = {
+        x: new Date(),
+        y: newPrice
+    };
+    
+    priceChart.data.datasets[0].data.push(newData);
+    
+    // Keep only last 50 data points
+    if (priceChart.data.datasets[0].data.length > 50) {
+        priceChart.data.datasets[0].data.shift();
+    }
+    
+    priceChart.update('none');
+}
+
+// Real-time chart updates
+function startChartUpdates() {
+    setInterval(updateChartData, 3000);
+}
+
+// Update DOMContentLoaded listener
+document.addEventListener('DOMContentLoaded', function() {
+    loadMarketData();
+    updateDisplays();
+    initChart();
+    startPriceSimulation();
+    startChartUpdates();
+    
+    // ... (event listeners lainnya) ...
+    
+    // Chart type buttons
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            if (e.target.textContent === '1m') switchChartType('line');
+            else switchChartType('candlestick');
+        });
+    });
+});
     
     alert(`${type.toUpperCase()} order executed successfully!`);
 }
